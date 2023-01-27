@@ -65,7 +65,6 @@ add_action("admin_init", "display_theme_panel_fields");
 if (get_option('checkbox')) {
     function reigel_woocommerce_checkout_fields($checkout_fields = array())
     {
-
         $checkout_fields['order']['my_field_name'] = array(
             'id' => 'checkboxId',
             'type'      => 'checkbox',
