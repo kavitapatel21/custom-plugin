@@ -79,9 +79,9 @@ if (get_option('checkbox')) {
             'id'            => 'my_date_picker',
             'type'      => 'text',
             'class'     => 'input-date-picker',
-            'value' =>  'date-picker',
+            //'value' =>  '',
             'label'     => __('Date'),
-            'required'      => true,
+            //'required'      => true,
         );
 
         return $checkout_fields;
@@ -135,6 +135,7 @@ function checkout_delivery_jquery_script()
 {
     // Only on front-end and checkout page
     if (is_checkout() && !is_wc_endpoint_url()) :
+        WC()->session->__unset('enable_fee');
     ?>
         <script>
             //$("#DeliveryDatePicker").hide();
@@ -142,6 +143,7 @@ function checkout_delivery_jquery_script()
                 var week = '<?php echo get_option('weekend-chk') ?>';
                 if (week) {
                     $("#my_date_picker").datepicker({
+                        minDate: new Date(),
                         beforeShowDay: $.datepicker.noWeekends
                     });
                 } else {
@@ -185,6 +187,8 @@ function checkout_delivery_jquery_script()
             });
         </script>
 <?php
+    else :
+        WC()->session->__unset('enable_fee');
     endif;
 }
 
@@ -205,7 +209,6 @@ function get_enable_fee()
 add_action('woocommerce_cart_calculate_fees', 'custom_percetage_fee', 20, 1);
 function custom_percetage_fee($cart)
 {
-
     // Only on checkout
     if ((is_admin() && !defined('DOING_AJAX')) || !is_checkout())
         return;

@@ -1,0 +1,18 @@
+2023-01-27T08:35:02+00:00 CRITICAL Uncaught Error: Call to a member function set() on null in D:\wamp64\www\pr\wp-content\plugins\woodelievery-manager\woodeliverymanager.php:205
+Stack trace:
+#0 D:\wamp64\www\pr\wp-settings.php(418): include_once()
+#1 D:\wamp64\www\pr\wp-config.php(97): require_once('D:\\wamp64\\www\\p...')
+#2 D:\wamp64\www\pr\wp-load.php(50): require_once('D:\\wamp64\\www\\p...')
+#3 D:\wamp64\www\pr\wp-admin\admin-ajax.php(22): require_once('D:\\wamp64\\www\\p...')
+#4 {main}
+  thrown in D:\wamp64\www\pr\wp-content\plugins\woodelievery-manager\woodeliverymanager.php on line 205
+
+2023-01-27T08:35:41+00:00 CRITICAL Uncaught Error: Call to a member function set() on null in D:\wamp64\www\pr\wp-content\plugins\woodelievery-manager\woodeliverymanager.php:205
+Stack trace:
+#0 D:\wamp64\www\pr\wp-settings.php(418): include_once()
+#1 D:\wamp64\www\pr\wp-config.php(97): require_once('D:\\wamp64\\www\\p...')
+#2 D:\wamp64\www\pr\wp-load.php(50): require_once('D:\\wamp64\\www\\p...')
+#3 D:\wamp64\www\pr\wp-admin\admin-ajax.php(22): require_once('D:\\wamp64\\www\\p...')
+#4 {main}
+  thrown in D:\wamp64\www\pr\wp-content\plugins\woodelievery-manager\woodeliverymanager.php on line 205
+
