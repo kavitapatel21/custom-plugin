@@ -41,6 +41,14 @@ function display_checkbox()
 <?php
 }
 
+//Display chkbox
+function display_chkbox()
+{
+?>
+    <input type="checkbox" name="weekend-chk" id="chkbox" value="1 <?php echo get_option('weekend-chk'); ?>" <?php if (get_option('weekend-chk')) { ?>checked="checked" <?php } ?> />
+<?php
+}
+
 //To display HTML code & automatic saving the value of fields
 function display_theme_panel_fields()
 {
@@ -48,34 +56,37 @@ function display_theme_panel_fields()
 
     add_settings_field("checkbox", "Woo-delivery-managment", "display_checkbox", "theme-options", "section");
     register_setting("section", "checkbox");
+
+    add_settings_field("weekend-chk", "For Weekends", "display_chkbox", "theme-options", "section");
+    register_setting("section", "weekend-chk");
 }
 add_action("admin_init", "display_theme_panel_fields");
 
 if (get_option('checkbox')) {
-function reigel_woocommerce_checkout_fields($checkout_fields = array())
-{
-    
-    $checkout_fields['order']['my_field_name'] = array(
-        'id' => 'checkboxId',
-        'type'      => 'checkbox',
-        'class'     => array('input-checkbox'),
-        'value' =>  'custom-chkbox',
-        'label'     => __('My custom checkbox'),
-        //'required'      => true,
-    );
+    function reigel_woocommerce_checkout_fields($checkout_fields = array())
+    {
 
-    $checkout_fields['order']['date_picker'] = array(
-        'id'            => 'my_date_picker',
-        'type'      => 'text',
-        'class'     => 'input-date-picker',
-        'value' =>  'date-picker',
-        'label'     => __('Date'),
-        'required'      => true,
-    );
-    return $checkout_fields;
-    
-}
-add_filter('woocommerce_checkout_fields', 'reigel_woocommerce_checkout_fields');
+        $checkout_fields['order']['my_field_name'] = array(
+            'id' => 'checkboxId',
+            'type'      => 'checkbox',
+            'class'     => array('input-checkbox'),
+            'value' =>  'custom-chkbox',
+            'label'     => __('My custom checkbox'),
+            //'required'      => true,
+        );
+
+        $checkout_fields['order']['date_picker'] = array(
+            'id'            => 'my_date_picker',
+            'type'      => 'text',
+            'class'     => 'input-date-picker',
+            'value' =>  'date-picker',
+            'label'     => __('Date'),
+            'required'      => true,
+        );
+
+        return $checkout_fields;
+    }
+    add_filter('woocommerce_checkout_fields', 'reigel_woocommerce_checkout_fields');
 }
 
 add_action('woocommerce_checkout_update_order_meta', 'save_custom_checkout_hidden_field');
@@ -93,8 +104,8 @@ add_action('woocommerce_thankyou', 'show_data_on_thankyou_page', 20);
 
 //Display data on thankyou page
 function show_data_on_thankyou_page($order_id)
-{ 
-    ?>
+{
+?>
     <section class="custom-billing-details">
         <p class="woocommerce-customer-details--nif"><span>Delivery Date: </span><?php echo get_post_meta($order_id, 'date_picker', true); ?></p>
     </section>
@@ -128,17 +139,26 @@ function checkout_delivery_jquery_script()
         <script>
             //$("#DeliveryDatePicker").hide();
             $(document).ready(function() {
-                $(function() {
-                    $("#my_date_picker").datepicker();
-                });
-            })
+                var week = '<?php echo get_option('weekend-chk') ?>';
+                if (week) {
+                    $("#my_date_picker").datepicker({
+                        beforeShowDay: $.datepicker.noWeekends
+                    });
+                } else {
+                    $("#my_date_picker").datepicker({
+                        minDate: new Date()
+                    });
+                }
+            });
+
             jQuery(function($) {
-                $('#checkboxId').val('');
+                //$('#checkboxId').val('');
                 $("#checkboxId").removeAttr("checked");
                 $("#my_date_picker").val('');
                 $("#my_date_picker").hide();
                 $('label[for="my_date_picker"]').hide();
                 $('input[type=checkbox]').change(function() {
+                    var fee = $(this).prop('checked') === true ? '1' : '';
                     //alert('changed');
                     if ($('#checkboxId').is(':checked')) {
                         $('#checkboxId').val('1');
@@ -149,9 +169,49 @@ function checkout_delivery_jquery_script()
                         $('label[for="my_date_picker"]').hide();
                         $("#my_date_picker").hide();
                     }
+
+                    $.ajax({
+                        type: 'POST',
+                        url: wc_checkout_params.ajax_url,
+                        data: {
+                            'action': 'enable_fee',
+                            'enable_fee': fee,
+                        },
+                        success: function(result) {
+                            $('body').trigger('update_checkout');
+                        },
+                    });
                 });
             });
         </script>
 <?php
     endif;
+}
+
+// Get Ajax request and saving to WC session
+add_action('wp_ajax_enable_fee', 'get_enable_fee');
+add_action('wp_ajax_nopriv_enable_fee', 'get_enable_fee');
+function get_enable_fee()
+{
+    if (isset($_POST['enable_fee'])) {
+        WC()->session->set('enable_fee', ($_POST['enable_fee'] ? true : false));
+    }
+    die();
+}
+
+// Add a custom dynamic $10 fee on checkout page
+
+
+add_action('woocommerce_cart_calculate_fees', 'custom_percetage_fee', 20, 1);
+function custom_percetage_fee($cart)
+{
+
+    // Only on checkout
+    if ((is_admin() && !defined('DOING_AJAX')) || !is_checkout())
+        return;
+
+    $percent = 10;
+
+    if (WC()->session->get('enable_fee'))
+        $cart->add_fee(__('Extra fee', 'woocommerce') . " ($percent)", ($percent));
 }
