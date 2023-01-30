@@ -80,7 +80,7 @@ if (get_option('checkbox')) {
             'class'     => 'input-date-picker',
             //'value' =>  '',
             'label'     => __('Date'),
-            //'required'      => true,
+            'required'      => true,
         );
 
         return $checkout_fields;
@@ -142,13 +142,41 @@ function checkout_delivery_jquery_script()
                 var week = '<?php echo get_option('weekend-chk') ?>';
                 if (week) {
                     $("#my_date_picker").datepicker({
-                        minDate: new Date(),
-                        beforeShowDay: $.datepicker.noWeekends
-                    });
+                            minDate: new Date(),
+                            dateFormat: 'dd/mm/yy',
+                            beforeShowDay: $.datepicker.noWeekends
+                        })
+                        .on('change', function() { // This check is for dd/mm/yyyy format but can be easily adapted to any other
+                            if (this.value.match(/\d{1,2}[^\d]\d{1,2}[^\d]\d{4,4}/gi) == null)
+                                alert('Invalid date format');
+                            else {
+                                var t = this.value.split(/[^\d]/);
+                                var dd = parseInt(t[0], 10);
+                                var m0 = parseInt(t[1], 10) - 1; // Month in JavaScript Date object is 0-based
+                                var yyyy = parseInt(t[2], 10);
+                                var d = new Date(yyyy, m0, dd); // new Date(2017, 13, 32) is still valid
+                                if (d.getDate() != dd || d.getMonth() != m0 || d.getFullYear() != yyyy)
+                                    alert('Invalid date value');
+                            }
+                        });
                 } else {
                     $("#my_date_picker").datepicker({
-                        minDate: new Date()
-                    });
+                            minDate: new Date(),
+                            dateFormat: 'dd/mm/yy'
+                        })
+                        .on('change', function() { // This check is for dd/mm/yyyy format but can be easily adapted to any other
+                            if (this.value.match(/\d{1,2}[^\d]\d{1,2}[^\d]\d{4,4}/gi) == null)
+                                alert('Invalid date format');
+                            else {
+                                var t = this.value.split(/[^\d]/);
+                                var dd = parseInt(t[0], 10);
+                                var m0 = parseInt(t[1], 10) - 1; // Month in JavaScript Date object is 0-based
+                                var yyyy = parseInt(t[2], 10);
+                                var d = new Date(yyyy, m0, dd); // new Date(2017, 13, 32) is still valid
+                                if (d.getDate() != dd || d.getMonth() != m0 || d.getFullYear() != yyyy)
+                                    alert('Invalid date value');
+                            }
+                        });
                 }
             });
 
