@@ -34,6 +34,7 @@ function launch_the_action()
     }
 }**/
 
+//Add custom order status in order status list in admin(Inside edit order)
 function register_shipment_arrival_order_status()
 {
     register_post_status('wc-arrival-shipment', array(
